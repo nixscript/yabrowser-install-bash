@@ -11,7 +11,7 @@ Y=${y:$s}
 e=`expr index "$Y" "\""`
 e=`expr $e - 1`
 yb="${Y:0:$e}"
-echo "Пакет последней версии: $yb"
+echo "Last version package is: $yb"
 rm -rf $i
 if [ ! -e "$HOME/.config/yandex-browser-beta/yandex-upd.sh.lastver" ]
 then
@@ -21,47 +21,45 @@ fi
 oyb=`cat "$HOME/.config/yandex-browser-beta/yandex-upd.sh.lastver"`
 if [[ $yb == $oyb ]]
 then
-	echo "Нет обновлений для Yandex Browser Beta."
+	echo "No updates for Yandex Browser Beta."
 	exit 1
 else
 	loyb=${#oyb}
 	if [[ $loyb -eq 0 ]]
 	then
-		echo "Либо Яндекс браузер не установлен, либо Вы не пользовались скриптом."
-		echo "Нет информации об установленной версии браузера."
+		echo "Yabrowser not installed or You not have run this script."
+		echo "No information about version of browser."
 	fi
-	echo "Хотите установить новую версию? [Y/n]"
+	echo "Do You want to install new version? [Y/n]"
 	read -n 1 n
 	if [[ $n == "y" || $n == "Y" || ! $n ]]
 	then
 		echo
-		echo "Приступаем к установке."
+		echo "Start to install."
 		urpmi "$addr/$yb"
 		echo $yb > "$HOME/.config/yandex-browser-beta/yandex-upd.sh.lastver"
-		echo "Установка браузера завершена."
+		echo "Browser installed."
 	else
 		echo
-		echo "Установка отменена."
-		echo "Хотите установить позже пакет $yb ? [Y/n]"
+		echo "Installation cancelled."
+		echo "Do You want to install package $yb later? [Y/n]"
 		read -n 1 $v
 		if [[ $v == "y" || $v == "Y" || ! $n ]]
 		then
 			echo
-			echo "При следующем запуске скрипта Вам будет предложено установить"
-			echo "актуальную версию браузера."
+			echo "In next running this script ask You to install new version."
 			exit 0
 		else
 			echo
 			echo $yb > "$HOME/.config/yandex-browser-beta/yandex-upd.sh.lastver"
-			echo "Установка текущей версии отменена. При следующем запуске, обновление будет"
-			echo "предложено только если версия пакета будет новее текущего."
+			echo "Current version instaal cancelled. In next time, will be updated if version is next."
 			exit 0
 		fi
 		exit 1
 	fi
 fi
 
-echo "Установка библиотеки libffmpeg"
+echo "Install libffmpeg"
 
 URL="http://archive.ubuntu.com/ubuntu/pool/universe/c/chromium-browser/"
 wget $URL
@@ -83,19 +81,19 @@ do
 done
 echo "b=$d"
 ll=`expr $d - 2`
-echo "Скачиваем последнюю версию: ${r[$ll]}"
+echo "Downloding last version: ${r[$ll]}"
 exit
 wget "$URL${r[$ll]}"
-echo "Распаковываем..."
+echo "Extract..."
 7z x "${r[$ll]}"
 tar -xf data.tar
-echo "Сохраняем предыдущую версию библиотеки в /opt/yandex/browser-beta/lib/libffmpeg.so.old"
+echo "Save previous version in to /opt/yandex/browser-beta/lib/libffmpeg.so.old"
 sudo mv /opt/yandex/browser-beta/lib/libffmpeg.so /opt/yandex/browser-beta/lib/libffmpeg.so.old
-echo "Копируем libffmpeg.so в /opt/yandex/browser-beta/lib/libffmpeg.so.ubuntu"
+echo "Copy libffmpeg.so in /opt/yandex/browser-beta/lib/libffmpeg.so.ubuntu"
 sudo cp usr/lib/chromium-browser/libffmpeg.so /opt/yandex/browser-beta/lib/libffmpeg.so.ubuntu
-echo "Создаем ссылку..."
+echo "Create symlink..."
 sudo ln -s /opt/yandex/browser-beta/lib/libffmpeg.so.ubuntu /opt/yandex/browser-beta/lib/libffmpeg.so
-echo "Удаляем временные файлы."
+echo "Remove temporary files."
 rm -rf usr index.html "${r[$ll]}" data.tar
-echo "Установка завершена."
+echo "Finished."
 exit 0
