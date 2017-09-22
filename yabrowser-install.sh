@@ -5,95 +5,89 @@
 addr="http://repo.yandex.ru/yandex-browser/rpm/beta/x86_64"
 i="index.html"
 wget -O $i "$addr/"
-y=`cat "$i" | grep "x86_64.rpm"`
-s=`expr index "$y" "\""`
-Y=${y:$s}
-e=`expr index "$Y" "\""`
-e=`expr $e - 1`
-yb="${Y:0:$e}"
-echo "Last version package is: $yb"
+y=$(cat "$i" | grep "x86_64.rpm")
+s="${y#*\"}"
+yb="${s%%\"*}"
+echo "Пакет последней версии: $yb"
 rm -rf $i
 if [ ! -e "$HOME/.config/yandex-browser-beta/yandex-upd.sh.lastver" ]
 then
 	touch "$HOME/.config/yandex-browser-beta/yandex-upd.sh.lastver"
 fi
-
-oyb=`cat "$HOME/.config/yandex-browser-beta/yandex-upd.sh.lastver"`
+yabrowserInstall(){
+oyb=$(cat "$HOME/.config/yandex-browser-beta/yandex-upd.sh.lastver")
 if [[ $yb == $oyb ]]
 then
-	echo "No updates for Yandex Browser Beta."
+	echo -e "\e[32;1mНет обновлений для Yandex Browser Beta.\e[0m"
 	exit 1
 else
 	loyb=${#oyb}
 	if [[ $loyb -eq 0 ]]
 	then
-		echo "Yabrowser not installed or You not have run this script."
-		echo "No information about version of browser."
+		echo -e"\e[35;1mYabrowser не установлен или скрипт $0 не запускался.\e[0m"
+		echo -e "\e[35;1mНет информации о версии браузера.\e[0m"
 	fi
-	echo "Do You want to install new version? [Y/n]"
+	echo -e "\e[34;1mВы хотите установить новую версию браузера? [Y/n]\e[0m"
 	read -n 1 n
 	if [[ $n == "y" || $n == "Y" || ! $n ]]
 	then
-		echo
-		echo "Start to install."
-		urpmi "$addr/$yb"
+		echo -e "\n\e[32;1mНачинаем установку...\e[0m"
+echo -e		urpmi "$addr/$yb"
 		echo $yb > "$HOME/.config/yandex-browser-beta/yandex-upd.sh.lastver"
-		echo "Browser installed."
+		echo -e "\e[32;1mБраузер установлен.\e[0m"
 	else
-		echo
-		echo "Installation cancelled."
-		echo "Do You want to install package $yb later? [Y/n]"
+		echo -e "\n\e[33;1mУстановка отменена.\e[0m"
+		echo -e "\e[32;1mВы хотите установить пакет $yb позже? [Y/n]\e[0m"
 		read -n 1 $v
 		if [[ $v == "y" || $v == "Y" || ! $n ]]
 		then
-			echo
-			echo "In next running this script ask You to install new version."
+			echo -e "\n\e[32mПри следующем запуске скрипт предложит установку новой версии.\e[0m"
 			exit 0
 		else
-			echo
 			echo $yb > "$HOME/.config/yandex-browser-beta/yandex-upd.sh.lastver"
-			echo "Current version instaal cancelled. In next time, will be updated if version is next."
+			echo -e "\n\e[33mУстановка актуальной версии отменена. В следующий раз будет предложено обновление только если выйдет следующая версия.\e[0m"
 			exit 0
 		fi
 		exit 1
 	fi
 fi
+}
 
-echo "Install libffmpeg"
+yabrowserInstall
+
+echo -e "\e[34;1mУстановка libffmpeg\e[m"
 
 URL="http://archive.ubuntu.com/ubuntu/pool/universe/c/chromium-browser/"
 wget $URL
 d=0
 declare -a r
-t=`cat index.html | grep "chromium-codecs-ffmpeg-extra_"`
+t=$(cat index.html | grep "chromium-codecs-ffmpeg-extra_")
 for LINE in $t
 do
-	l=`expr "$LINE" : '.*chromium-codecs-ffmpeg-extra_'`
-	l=`expr $l - 29`
-	s=`expr "${LINE:$l}" : '.*amd64.deb'`
-	sr="${LINE:$l:$s}"
-	sl=${#sr}
-	if [[ $sl -gt 0 ]]
+	pkg="${LINE#*href=\"}"
+	sr="${pkg%%\"*}"
+	l="chromium-codecs-ffmpeg-extra_"
+	sl="${#l}"
+	if [[ ${sr:0:$sl} == $l ]]
 	then
 		r[$d]="$sr"
-		d=`expr $d + 1`
+		d=$((d + 1))
 	fi
 done
-echo "b=$d"
+#echo "b=$d"
 ll=`expr $d - 2`
-echo "Downloding last version: ${r[$ll]}"
-exit
+echo -e "\e[32;1mСкачиваем последний пакет: ${r[$ll]}\e[0m"
 wget "$URL${r[$ll]}"
-echo "Extract..."
+echo -e "\e[32;1mРаспаковываем...\e[0m"
 7z x "${r[$ll]}"
 tar -xf data.tar
-echo "Save previous version in to /opt/yandex/browser-beta/lib/libffmpeg.so.old"
+echo -e "\e[34;1mСохраняем предыдущую версию в /opt/yandex/browser-beta/lib/libffmpeg.so.old\e[0m"
 sudo mv /opt/yandex/browser-beta/lib/libffmpeg.so /opt/yandex/browser-beta/lib/libffmpeg.so.old
-echo "Copy libffmpeg.so in /opt/yandex/browser-beta/lib/libffmpeg.so.ubuntu"
+echo -e "\e[34;1mКопируем libffmpeg.so в /opt/yandex/browser-beta/lib/libffmpeg.so.ubuntu\e[0m"
 sudo cp usr/lib/chromium-browser/libffmpeg.so /opt/yandex/browser-beta/lib/libffmpeg.so.ubuntu
-echo "Create symlink..."
+echo -e "\e[34;1mСоздаем ссылку...\e[0m"
 sudo ln -s /opt/yandex/browser-beta/lib/libffmpeg.so.ubuntu /opt/yandex/browser-beta/lib/libffmpeg.so
-echo "Remove temporary files."
+echo -e "\e[34;1mУдаляем временные файлы...\e[0m"
 rm -rf usr index.html "${r[$ll]}" data.tar
-echo "Finished."
+echo -e "\e[32;1mГотово!\e[0m"
 exit 0
