@@ -15,4 +15,4 @@ Bash скрипт для установки и обновления яндекс
 
 [vk.com/nixscript](https://vk.com/nixscript)
 
-[instagram.com/nixscript](https://instagram.com/@nixscript)
+[instagram.com/nixscript](https://www.instagram.com/nixscript/)
