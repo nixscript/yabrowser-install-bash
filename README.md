@@ -7,3 +7,12 @@
 Bash script for install and update yandex browser Rosa Linux
 
 Bash скрипт для установки и обновления яндекс браузера в Росе
+
+Об ошибках сообщайте мне:
+[grigruss@ya.ru](mailto:grigruss@ya.ru)
+
+[#nixscript:matrix.org](https://riot.im/app/#/room/#nixscript:matrix.org)
+
+[vk.com/nixscript](https://vk.com/nixscript)
+
+[instagram.com/@nixscript](https://instagram.com/@nixscript)
